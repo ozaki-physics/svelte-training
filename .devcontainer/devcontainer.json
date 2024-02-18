@@ -7,9 +7,11 @@
   // 'service' プロパティは、VS Code が使用すべきコンテナのサービス名
 	"service": "svelte_training",
   // VS Code が接続時にデフォルトで開くパス
-	"workspaceFolder": "/usr/src/svelte-training",
+	"workspaceFolder": "/svelte-training",
   // コンテナ内の VS Code で使いたい拡張機能
 	"extensions": [
+    // svelte の公式拡張機能
+    "svelte.svelte-vscode",
     // git の履歴が確認できる拡張機能(ホスト側だけの拡張が推奨) 視覚的に見やすくしたいから
     "donjayamanne.githistory",
     // Markdown でグラフを書く

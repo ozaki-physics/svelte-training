@@ -8,9 +8,14 @@ services:
     tty: true
     environment:
       - NODE_ENV=development
-      - SERVER_PORT=5000
     volumes:
-      - .:/user/src/svelte-training:rw
+      - ./:/svelte-training:rw
+      # コンテナ側の node_modules を ホストと同期しない
+      - sveltekit-node_modules-volume:/svelte-training/app/node_modules
     ports:
-      - "127.0.0.1:5000:5000"
+      - "127.0.0.1:5000:8080"
     command: bash
+volumes:
+  sveltekit-node_modules-volume:
+    name: sveltekit-node_modules
+    driver: local
