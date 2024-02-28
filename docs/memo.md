@@ -100,6 +100,40 @@ found 0 vulnerabilities
 ```
 `# npm run dev -- --host --port=8080`
 Docker の 8080 を ローカルの 5000 に繋いでいるから http://localhost:5000/ でアクセスできる
+### 静的ビルド
+[アプリをビルドする](https://kit.svelte.jp/docs/building-your-app)
+[Static site generation](https://kit.svelte.jp/docs/adapter-static)
+[trailingSlash](https://kit.svelte.jp/docs/page-options#trailingslash)
+[prerender](https://kit.svelte.jp/docs/page-options#prerender)
+[paths](https://kit.svelte.jp/docs/configuration#paths)
+[$app/paths](https://kit.svelte.jp/docs/modules#$app-paths)
+`npm i -D @sveltejs/adapter-static`
+```console
+added 1 package, and audited 225 packages in 9s
+
+45 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+```
+`npm run build`
+でも build したファイルをローカルで見ようと思っても うまくいかない
+具体的には URL 上は /about を about.html に紐づかない
+でも これはファイルシステムでは無理なこと
+__静的にビルドできたとしても これを Go で全部ルーティングするのは無理では?__
+app/svelte.config.js に `paths: { base: '',}` を追加して
+app/src/routes/+layout.svelte に import と {base} を書いたら ビルドしても 相対っぽくなった
+```html
+<script>
+	import { resolveRoute, assets, base } from '$app/paths';
+</script>
+<nav>
+	<a href="{base}/">home</a>
+	<a href="{base}/about">about</a>
+</nav>
+
+<slot />
+```
 ### Vite とは
 https://ja.vitejs.dev/
 Vue.js の作者によって作られた バンドルツール 兼 ローカル開発サーバを作るツール
@@ -222,3 +256,9 @@ https://kit.svelte.jp/docs/faq#how-do-i-use-x-with-sveltekit-how-do-i-use-a-diff
 >別のサブドメインへのリクエストも、追加の DNS ルックアップや TLS セットアップなどのためにレイテンシーが増加する可能性があります。この方法を使いたい場合は、handleFetch が参考になるかもしれません。
 >別の方法は、頭痛の種である CORS をバイパスするためのプロキシーをセットアップすることです。
 >本番環境では、/api などのパスを API サーバーに書き換えます(rewrite)。ローカルの開発環境では、Vite の server.proxy オプションを使用します。
+### HTML Living Standard  
+W3C による HTML5.x の仕様策定は中止され HTML Living Standard が HTML の標準仕様
+
+https://www.tohoho-web.com/html/memo/htmlls.htm  
+### ESlint の使い方  
+__調べたい__  
