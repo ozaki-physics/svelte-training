@@ -1,5 +1,6 @@
 <script>
   import { fly, slide } from 'svelte/transition';
+  // from タグ の ページリロード を無くす ライブラリ
   import { enhance } from '$app/forms';
   // app/src/routes/+layout.js で prerender を true にしてたら動かない
   // エラー： アクションを含むページをプリレンダリングできません と言われた
@@ -9,6 +10,11 @@
   // actions の戻り値が入っている
   // フォーム送信後のみ 値が入っている
   export let form;
+
+  // 待機状態を作るためのローカル状態
+  let creating = false;
+  /*** @type {any[]} */
+  let deleting = [];
 </script>
 
 <div class="centered">
@@ -20,7 +26,16 @@
   {/if}
 
   <!-- なにか入力して Enter すると POST になる -->
-  <form method="POST" action="?/create" use:enhance>
+  <!-- use:enhance をつけて ページリロードを無くす -->
+  <form method="POST" action="?/create"
+    use:enhance={() => {
+      creating = true;
+
+      return async ({ update }) => {
+        await update();
+        creating = false;
+      }
+  }}>
     <label>
       todo を追加して Enter 押してね:
       <input
@@ -33,11 +48,19 @@
   </form>
 
   <ul class="todos">
-    {#each data.todos as todo (todo.id)}
+    {#each data.todos.filter((/** @type {{ id: any; }} */ todo) => !deleting.includes(todo.id)) as todo (todo.id)}
       <li in:fly={{ y: 20 }} out:slide>
         <!-- +page.server.js の actions(JS 的には Map) の中で -->
         <!-- 一致した Key のやつが動く -->
-        <form method="POST" action="?/delete01" use:enhance>
+        <form method="POST" action="?/delete01"
+          use:enhance={() => {
+            deleting = [...deleting, todo.id];
+            return async ({ update }) => {
+              await update();
+              deleting = deleting.filter((id) => id !== todo.id);
+            };
+          }}
+        >
           <input type="hidden" name="id" value={todo.id} />
           <span>{todo.description}</span>
           <button aria-label="Mark as complete" />
@@ -45,6 +68,10 @@
       </li>
     {/each}
   </ul>
+
+  {#if creating}
+    <span class="saving">作成中...</span>
+  {/if}
 </div>
 
 <style>
@@ -80,7 +107,7 @@
     opacity: 1;
   }
 
-  /* .saving {
+  .saving {
     opacity: 0.5;
-  } */
+  }
 </style>

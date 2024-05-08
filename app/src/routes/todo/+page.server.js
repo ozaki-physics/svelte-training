@@ -20,6 +20,8 @@ export function load({ cookies }) {
 export const actions = {
   // form での create アクション のとき動く
   create: async ({ cookies, request }) => {
+    // 待機状態を作るために あえて動作を遅くする
+    await new Promise((fulfil) => setTimeout(fulfil, 1000));
     // form データの取得
     const data = await request.formData();
 
@@ -37,6 +39,8 @@ export const actions = {
 
   // form での delete01 アクション のとき動く
   delete01: async ({ cookies, request }) => {
+    // 待機状態を作るために あえて動作を遅くする
+    await new Promise((fulfil) => setTimeout(fulfil, 1000));
     // form データの取得
     const data = await request.formData();
     db.deleteTodo(cookies.get('userid'), data.get('id'));
