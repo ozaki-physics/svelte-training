@@ -1,4 +1,6 @@
 <script>
+  import { fly, slide } from 'svelte/transition';
+  import { enhance } from '$app/forms';
   // app/src/routes/+layout.js で prerender を true にしてたら動かない
   // エラー： アクションを含むページをプリレンダリングできません と言われた
 
@@ -18,7 +20,7 @@
   {/if}
 
   <!-- なにか入力して Enter すると POST になる -->
-  <form method="POST" action="?/create">
+  <form method="POST" action="?/create" use:enhance>
     <label>
       todo を追加して Enter 押してね:
       <input
@@ -32,10 +34,10 @@
 
   <ul class="todos">
     {#each data.todos as todo (todo.id)}
-      <li>
+      <li in:fly={{ y: 20 }} out:slide>
         <!-- +page.server.js の actions(JS 的には Map) の中で -->
         <!-- 一致した Key のやつが動く -->
-        <form method="POST" action="?/delete01">
+        <form method="POST" action="?/delete01" use:enhance>
           <input type="hidden" name="id" value={todo.id} />
           <span>{todo.description}</span>
           <button aria-label="Mark as complete" />
