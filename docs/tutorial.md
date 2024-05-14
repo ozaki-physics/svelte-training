@@ -173,7 +173,7 @@ DOM イベントハンドラには それらの動作を変更する 修飾子(m
 
 イベント修飾子の一覧  
 - preventDefault  
-ハンドラを実行する前に event.preventDefault() を呼び出します。たとえば、クライアントのフォーム処理に役立ちます。  
+ハンドラを実行する前に event.preventDefault() を呼び出します。たとえば クライアントのフォーム処理に役立ちます。  
 - stopPropagation  
 次の要素にイベントが伝播しないように event.stopPropagation() を呼び出します。  
 - passive  
@@ -181,13 +181,13 @@ DOM イベントハンドラには それらの動作を変更する 修飾子(m
 - nonpassive  
 passive: false を明示的に設定します。  
 - capture  
-バブリング(bubbling) フェーズではなく、キャプチャ(capture) フェーズ中にハンドラを起動します。  
+バブリング(bubbling) フェーズではなく キャプチャ(capture) フェーズ中にハンドラを起動します。  
 - once  
 ハンドラを最初に実行した後に削除します。  
 - self  
-設定した要素が event.target の場合にのみ、ハンドラをトリガします。  
+設定した要素が event.target の場合にのみ ハンドラをトリガします。  
 - trusted  
-event.isTrusted が true の場合にのみハンドラをトリガします。つまり、JavaScript が element.dispatchEvent(...) を呼び出した場合は true にならず、ユーザーのアクションによってイベントがトリガされた場合は true になります。  
+event.isTrusted が true の場合にのみハンドラをトリガします。つまり JavaScript が element.dispatchEvent(...) を呼び出した場合は true にならず ユーザーのアクションによってイベントがトリガされた場合は true になります。  
 
 コンポーネント から イベント を発信することもできる  
 そのときは ディスパッチャ を作成する  
@@ -238,7 +238,7 @@ store とは 値が変化するたびに 関係者に通知する subscribe メ�
 `import { writable } from 'svelte/store';` で変数が定義されていたら `set()` と `update()` も兼ね備えている  
 コンポーネントが何度もインスタンス化および破棄されるなら メモリリーク が発生することになるので アンサブスクライブ が必要  
 subscribe メソッドを呼ぶと unsubscribe 関数が返るため それを変数に格納し `onDestroy(変数);` とする  
-ただ Svelte には 便利や使い方が用意されていて store の名前の前に `$` を付けることで、store の値を参照できる  
+ただ Svelte には 便利や使い方が用意されていて store の名前の前に `$` シンボル を付けることで store の値を参照できる  
 store 名の前に `$` をつけることで 毎回呼び出して コンポーネントを生成するのではなく 参照で済むし 自動サブスクリプションになる  
 
 読み込み専用の store として readable がある  
@@ -254,6 +254,7 @@ stop 関数 は 最後 の サブスクライバー が サブスクライブ �
 ローカルコンポーネントの状態にバインドするのと同じように store の値もバインドできる  
 ## Advanced Svelte
 ### 07_ComponentComposition
+_サンプル: `app/src/routes/advanced-svelte/07_ComponentComposition`_  
 要素を入れ子にできるように コンポーネント 入れ子にできる  
 そのとき コンポーネント 内のどこに 入れ子にするか 指定するために `<slot />` を書く
 ## Basic SvelteKit
@@ -279,10 +280,10 @@ src/routes はアプリの ルート(routes) を定義
 static にはアプリをデプロイするときに含めるべきアセット (favicon.png や robots.txt など)  
 ### 02_Routing
 SvelteKit はファイルシステムベースのルーティング(Routing)を採用  
-src/routes 内にあるすべての +page.svelte ファイルは、アプリのページを作成  
+src/routes 内にあるすべての +page.svelte ファイルは アプリのページを作成  
 UI を共有する場合 同じディレクトリ内のすべてのルートに適用される +layout.svelte コンポーネント を使用する  
 動的なパラメータ付きのルート(routes) は 角括弧を使用して有効な変数名を囲む  
-`src/routes/blog/[slug]/+page.svelte` というファイルは、/blog/one, /blog/two, /blog/three などにマッチするルート(route)を作成  
+`src/routes/blog/[slug]/+page.svelte` というファイルは /blog/one, /blog/two, /blog/three などにマッチするルート(route)を作成  
 少なくとも1つの静的な文字で区切られていれば 1つの URL セグメント内に複数のルートパラメータを使用することができる  
 例: `foo/[bar]x[baz]` だと `[bar]` と `[baz]` は動的なパラメータ  
 ### 03_Loading
@@ -313,6 +314,148 @@ SvelteKit では cookie をセキュアにするために 以下をデフォル�
 }
 ```
 ### 05_Shared modules
+_サンプル: `app/src/routes/deeply/nested/+page.svelte`_  
 SvelteKit では `src/lib` に `$lib` エイリアスが設定されている  
 コードは使う場所のすぐ近くに置くのがよいが 複数の場所で使われるコードもあるから  
 そのときに プレフィックスで `../` を連続して 書かなくて済むようになる  
+### 06_Forms
+_サンプル: `app/src/routes/todo`_  
+web プラットフォームにおけるデータ送信方法である `<form>`  
+Enter を押すと 勝手に データベースが更新され 新しいデータでページがリロードされる  
+この動作に `fetch` など動かしておらず それにも関わらずデータが更新されていることが凄い  
+つまり JavaScript が利用できない環境でも動作する  
+
+1つのページに複数の action を持たせる場合が多く 単一の action しかないページは稀  
+`+page.server.js` の default アクション を 名前付きにする  
+default action と 名前付きの action は 共存できない  
+
+form の action 属性には任意の URL を指定できる  
+別のページで定義されている action を呼び出したければ `/todos?/create` と指定する  
+同一のページに action が あるとき パス名を省略して 先頭が `?` から始められる  
+
+バリデーション は ブラウザに組み込まれたフォームバリデーション(built-in form validation) がある  
+例えば `<input>` を必須項目としてマークすることができる  
+でも ちゃんと サーバサイド のバリデーション も 実装する必要がある  
+
+サーバのコンソールにエラーを出しても ユーザー には不親切  
+同じページを表示させたまま何が問題だったのかを示し ユーザーがそれを修正できるようにするほうが良い  
+これを行うために fail 関数を使用して action からデータと適切な HTTP ステータスコードを返すことができる  
+`src/routes/+page.svelte` では form プロパティを介して  
+`app/src/routes/todo/+page.server.js` の actions 戻り値にアクセスすることができる  
+form プロパティ には フォーム送信後のときだけ 値が入っている  
+
+fail でラップしなくても action から値を返すこともできる  
+例えば データが保存されたときに 'success!' というメッセージを返すなど  
+
+ユーザーが JavaScript を有効にしているときは  
+a タグ を シングルページアプリケーション として動かすように  
+form タグ を 送信しても ページリロード しないようにできる方法がある  
+それが form タグ に追加する `use:enhance`  
+ページをリロードするのではなく更新するようなったので トランジションなどで装飾することができる  
+シングルページアプリケーションのような ページ遷移 に見せない動作のことを チュートリアル上では ブラウザネイティブな動作をエミュレート と表現している  
+
+ブラウザネイティブな動作をエミュレート ができるようになると コールバックを提供して 待機状態 など表現できるようになる  
+### 07_API routers
+_サンプル: `app/src/routes/api-router`_  
++server.js ファイルを追加して HTTP メソッドと同じ文字列の関数を エクスポートするだけで API Router が作れる  
+リクエストハンドラは Response オブジェクトを返さないといけない  
+
+JSON で返すとき レスポンスヘッダー などを JSON 用にしてくれる ライブラリ が SvelteKit にある  
+
+```js
+export function GET() {
+	const number = Math.floor(Math.random() * 6) + 1;
+
+	return new Response(number, {
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+}
+```
+
+上記の代わりに下記で済む  
+
+```js
+import { json } from '@sveltejs/kit';
+
+export function GET() {
+	const number = Math.floor(Math.random() * 6) + 1;
+
+	return json(number);
+}
+```
+
+POST も書けるけど JS なしでも動作するし form action の方が推奨らしい  
+REST API にするために URL も `/[id]/+server.js` の中に PUT や DELETE メソッドを書くとよい  
+### 08_Stores
+Svelte の Store は 個々のコンポーネントに属さない データを おいておける  
+SvelteKit では 3つの読み取り専用 store を $app/stores から使用できる(page, navigating, updated)  
+一番多く使うのは page  
+https://kit.svelte.jp/docs/types#public-types-page  
+
+- url : 現在のページの URL  
+- params : 現在のページのパラメータ  
+- route : 現在のルート(route)を表す id プロパティを持つオブジェクト  
+- status : 現在のページの HTTP ステータスコード  
+- error : 現在のページのエラーオブジェクト (エラーが存在する場合。以降の演習でエラーハンドリングを学習する予定です)  
+- data : 現在のページの data。全ての load 関数からの戻り値が足されたもの  
+- form : form action から返されるデータ  
+
+他の store と同様 コンポーネントでは `$` シンボルを先頭に付けることでその値を参照できる  
+現在のパス名は `$page.url.pathname`  
+
+次は navigating  
+例えばリンクをクリック, ブラウザの '戻る/進む', プログラムで goto を呼んだとき に navigating の値は以下のプロパティを持つオブジェクトになる  
+https://kit.svelte.jp/docs/types#public-types-navigation  
+
+- from : ナビゲーションがトリガーされた場所 : NavigationTarget オブジェクト or null  
+- to : ナビゲーションの行き先/行った先 : NavigationTarget オブジェクト or null  
+- type : ナビゲーションのタイプ(例えば link, popstate, goto)  
+
+NavigationTarget オブジェクト が params, route, url プロパティを持つ  
+
+最後は updated  
+最初にページを開いてからそれ以降にアプリの新バージョンがデプロイされたかどうかを表す true or false を持つ  
+これを動作させるには `svelte.config.js` で `kit.version.pollInterval` を指定する必要がある  
+`pollInterval` と関係なく 手動で新バージョンがデプロイされたかチェックする方法は `updated.check()` を呼び出す  
+### 09_Errors and redirects
+SvelteKit には2種類のエラーがある  
+- 想定される(expected) エラー  
+- 予期せぬ(unexpected) エラー  
+
+想定されるエラーは `@sveltejs/kit` からインポートできる error ヘルパーを使用して作成できる  
+想定されるエラーのメッセージはユーザーに表示されますが 予期せぬエラーのメッセージは編集されて 一般的な 'Internal Error' メッセージと 500 ステータスコードになる  
+なぜなら エラーメッセージには機密情報が含まれている可能性があるから  
+
+load 関数の内側でなにか問題が発生したとき SvelteKit はエラーページをレンダリングする  
+`src/routes/+error.svelte` コンポーネントを作成することで エラーページをカスタマイズできる  
++error.svelte は +layout.svelte の内側でレンダリングされる  
+ディレクトリごとに +error.svelte を作成できる  
+
+もし 深刻な 問題が発生した場合 SvelteKit は静的なエラーページにフォールバックする  
+深刻な問題とは 例えば最上位(root)のレイアウトでデータをロードしているとき, エラーページのレンダリング中にエラーが発生した場合など  
+試しに発生させる方法は `src/routes/+layout.server.js` の `load()` で `thow new Error("foo");` や `throw error(420, 'まぁまぁ落ち着け');` をする  
+すると `500 | Internal Error` とシンプルなデザインのページになる  
+この フォールバックエラーページ は `src/error.html` ファイルを作ってカスタマイズすることも可能  
+`src/error.html` は 以下の項目を含めることができる  
+
+- `%sveltekit.status%` : HTTP ステータスコード  
+- `%sveltekit.error.message%` : エラーメッセージ  
+
+throw のメカニズムを あるページから別のページにリダイレクトするのにも流用できる  
+`import { redirect } from '@sveltejs/kit';` で `throw redirect(307, '/home');` する  
+よく使用されるステータスコードは以下がある  
+
+- 303 : form actions で 送信に成功したあと続いて使用されます  
+- 307 : 一時的なリダイレクトに使用されます  
+- 308 : 恒久的なリダイレクトに使用されます  
+
+`throw redirect(...)` は load 関数, form actions, API ルート, handle hook の内側 で使うことができる  
+## Advanced SvelteKit
+### 06_Environment variables
+
+## 感覚的なメモ
+`+page.svelte` が その path でのページ  
+`+page.server.js` が `+page.svelte` のロード時に呼び出すものや HTML の Form の アクションを定義したりする  
+`+server.js` は その path のときに動く サーバ側のコード  
