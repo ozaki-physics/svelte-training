@@ -57,3 +57,61 @@ export function deleteTodo(userid, todoid) {
     todos.splice(index, 1);
   }
 }
+
+// api-router の方で使う関数たち
+const database = new Map();
+
+/**
+ * 取得する
+ * @param {any} userid
+ */
+export function getTodos02(userid) {
+  if (!database.has(userid)) {
+    createTodo02({ userid, description: 'API routes について勉強する' });
+  }
+
+  return Array.from(database.get(userid).values());
+}
+
+/**
+ * 作成する
+ */
+// @ts-ignore
+export function createTodo02({ userid, description }) {
+  if (!database.has(userid)) {
+    database.set(userid, new Map());
+  }
+
+  const todos = database.get(userid);
+
+  const id = crypto.randomUUID();
+
+  todos.set(id, {
+    id,
+    description,
+    done: false
+  });
+
+  // どんな値が格納されてるか確認するため
+  console.log(database)
+
+  return {
+    id
+  };
+}
+
+// @ts-ignore
+export function toggleTodo02({ userid, id, done }) {
+  const todos = database.get(userid);
+  todos.get(id).done = done;
+  // どんな値が格納されてるか確認するため
+  console.log(database)
+}
+
+// @ts-ignore
+export function deleteTodo02({ userid, id }) {
+  const todos = database.get(userid);
+  todos.delete(id);
+  // どんな値が格納されてるか確認するため
+  console.log(database)
+}
