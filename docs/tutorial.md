@@ -254,9 +254,10 @@ stop 関数 は 最後 の サブスクライバー が サブスクライブ �
 ローカルコンポーネントの状態にバインドするのと同じように store の値もバインドできる  
 ## Advanced Svelte
 ### 07_ComponentComposition
-_サンプル: `app/src/routes/advanced-svelte/07_ComponentComposition`_  
+[サンプル](../app/src/routes/advanced-svelte/07_ComponentComposition)  
 要素を入れ子にできるように コンポーネント 入れ子にできる  
-そのとき コンポーネント 内のどこに 入れ子にするか 指定するために `<slot />` を書く
+そのとき コンポーネント 内のどこに 入れ子にするか 指定するために `<slot />` を書く  
+`<slot>foo</slot>` にすると slot が空のとき foo が表示される  
 ## Basic SvelteKit
 ### 01_Introduction
 Svelte は コンポーネントフレームワーク  
@@ -286,7 +287,7 @@ UI を共有する場合 同じディレクトリ内のすべてのルートに�
 `src/routes/blog/[slug]/+page.svelte` というファイルは /blog/one, /blog/two, /blog/three などにマッチするルート(route)を作成  
 少なくとも1つの静的な文字で区切られていれば 1つの URL セグメント内に複数のルートパラメータを使用することができる  
 例: `foo/[bar]x[baz]` だと `[bar]` と `[baz]` は動的なパラメータ  
-### 03_Loading
+### 03_Loading data
 SvelteKit が行う仕事は 本質的には 次の3つに集約  
 - ルーティング(Routing) - 受け取ったリクエストにどのルートがマッチするかを判断する  
 - ローディング(Loading) - ルートが必要とするデータを取得する  
@@ -314,12 +315,12 @@ SvelteKit では cookie をセキュアにするために 以下をデフォル�
 }
 ```
 ### 05_Shared modules
-_サンプル: `app/src/routes/deeply/nested/+page.svelte`_  
+[サンプル](../app/src/routes/deeply/nested/+page.svelte)  
 SvelteKit では `src/lib` に `$lib` エイリアスが設定されている  
 コードは使う場所のすぐ近くに置くのがよいが 複数の場所で使われるコードもあるから  
 そのときに プレフィックスで `../` を連続して 書かなくて済むようになる  
 ### 06_Forms
-_サンプル: `app/src/routes/todo`_  
+[サンプル](../app/src/routes/todo)  
 web プラットフォームにおけるデータ送信方法である `<form>`  
 Enter を押すと 勝手に データベースが更新され 新しいデータでページがリロードされる  
 この動作に `fetch` など動かしておらず それにも関わらずデータが更新されていることが凄い  
@@ -356,7 +357,7 @@ form タグ を 送信しても ページリロード しないようにでき�
 
 ブラウザネイティブな動作をエミュレート ができるようになると コールバックを提供して 待機状態 など表現できるようになる  
 ### 07_API routers
-_サンプル: `app/src/routes/api-router`_  
+[サンプル](../app/src/routes/api-router)  
 +server.js ファイルを追加して HTTP メソッドと同じ文字列の関数を エクスポートするだけで API Router が作れる  
 リクエストハンドラは Response オブジェクトを返さないといけない  
 
@@ -453,7 +454,79 @@ throw のメカニズムを あるページから別のページにリダイレ�
 
 `throw redirect(...)` は load 関数, form actions, API ルート, handle hook の内側 で使うことができる  
 ## Advanced SvelteKit
+### 02_Page options
++page.js, +page.server.js, +layout.js, +layout.server.js ファイルから load 関数をエクスポートする方法を Loading data の章で学んだ  
+これらのモジュールからは 他にも 様々な ページオプション をエクスポートできる  
+- ssr — ページをサーバーレンダリングするかどうか
+- csr — SvelteKit client をロードするかどうか
+- prerender — リクエストの度にレンダリングする代わりに ビルド時にページをプリレンダリングするかどうか
+- trailingSlash — URL の末尾のスラッシュ(trailing slashes)を, 削除するか, 追加するか, 無視するか
+
+ページオプションは ページごと, ページのグループごと, アプリ全体 でも適用できる  
+- ページごと: +page.js や +page.server.js からエクスポート  
+- ページのグループごと: +layout.js や +layout.server.js からエクスポート  
+- アプリ全体 最上位のレイアウト(root layout) からエクスポート  
+
+基本は親レイアウトで設定された値でオーバーライドする  
+マーケティング用のページはプリレンダリング, データドリブンなページは動的にサーバーでレンダリング, 管理者用ページはクライアントレンダリングされる SPA など使い分けができる  
+
+サーバーサイドレンダリング (Server-side rendering, SSR)  
+サーバーで HTML を生成するプロセス  
+SvelteKit の デフォルト は SSR  
+SSR を無効にするためには その階層の `+page.server.js` で `export const ssr = false;` を書く  
+ルートの `+layout.server.js` で `ssr=false` にすると アプリ全体が シングルページアプリ(SPA) になる  
+
+クライアントサイドレンダリング(CSR)  
+ページをインタラクティブにし SvelteKit がナビゲーション時にフルページリロードなしでページを更新できる  
+CSR を無効にするためには その階層の `+page.server.js` で `export const csr = false;` を書く  
+無効にすると JavaScript がクライアントに全く提供されなくなるため インタラクティブでなくなる  
+
+プリレンダリング  
+リクエストのたびに動的にレンダリングするのではなく ビルド時に1度だけ HTML を生成する  
+メリット は 静的データの配信が 圧倒的にパフォーマンス良くなる  
+cache-control ヘッダー (これは間違いやすいことです) のことを気にすることない  
+デメリット は ビルドに時間がかかる, プリレンダリングされたコンテンツの更新に アプリを再度デプロイするしかない  
+プリレンダリングにするには `+page.server.js` で `export const prerender = true;` を書く  
+最上位(root)の `+layout.server.js` で `prerender=true` にすると SvelteKit は 静的サイトジェネレーター (static site generator, SSG) になる  
+
+末尾のスラッシュ  
+SEO に悪影響を与えたりと 雑に扱ってはならない  
+今見ているページが `/foo` で `./bar` に移動したときは `/bar` に行く  
+今見ているページが `/foo/` で `./bar` に移動したときは `/foo/bar` に行く  
+SvelteKit はデフォルトで 末尾のスラッシュを削除 する  
+つまり /foo/ に対するリクエストは /foo にリダイレクト する  
+末尾のスラッシュが常に存在したいときは `+page.server.js` で `export const trailingSlash = 'always';` を書く  
+デフォルトの値は `trailingSlash='never'`  
+末尾のスラッシュ は プリレンダリング に影響する  
+`/always/` のような URL は `always/index.html` として ディスクに保存される  
+`/never` のような URL は `never.html` のように保存される  
+### 04_Advanced routing
+ログインが必要なページと否なページを分けられる  
+[サンプル](../app/src/routes/advanced-sveltekit/04_advanced-routing)  
+URL のルーティングに影響しないで 共通のレイアウトを使いたいとき ルートグループ(route group) が便利  
+ルートグループ は 丸括弧でくくられたディレクトリ  
+共通のログインの仕組みなどを用意できる  
 ### 06_Environment variables
+API キーやデータベースの認証情報などの環境変数は .env ファイルに追加することでき アプリケーションから使えるようになる  
+[パス](../app/.env)  
+gitignore するのを忘れないようにすること  
+`import { PASSPHRASE } from '$env/static/private';` で呼び出せるようになる  
+PASSPHRASE は .env に書いた key  
+`$env/static/private` は 間違えて ブラウザに送信しないように `+page.svelte` のクライアントサイドコードに インポートを書くとエラーになる  
+インポートできるのは サーバモジュールのみ  
+- +page.server.js  
+- +layout.server.js  
+- +server.js  
+- .server.js で終わるモジュール  
+- src/lib/server に置いてあるモジュール  
+
+`$env/static/private` は これらの値がビルド時に解決され 静的に置き換えられる ことを示す  
+アプリの実行時に環境変数の値を読む必要があるときは `$env/dynamic/private` を使う  
+`import { env } from '$env/dynamic/private'` と書いて JS コードは env.KEY と書く  
+
+ブラウザに公開してもよい 環境変数は `PUBLIC_` プレフィックス をつける  
+そして `+page.svelte` で `import { PUBLIC_THEME_FOREGROUND } from '$env/static/public';` と書く  
+先ほどと同様に アプリ実行時に解決したいときは `import { env } from '$env/dynamic/public';` と書く  
 
 ## 感覚的なメモ
 `+page.svelte` が その path でのページ  
